@@ -103,6 +103,20 @@ export function LoginForm() {
       <p className="text-[11px] text-zinc-400 text-center pt-2">
         Hanya untuk akun super admin Aura.
       </p>
+
+      {/* DEV demo box — remove sebelum prod deploy. Memo akun sementara
+          biar gak lupa kredensial waktu masih iterasi. */}
+      <div className="mt-2 p-3 rounded-lg bg-purple-50 border border-purple-100 space-y-1">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-purple-700">
+          Akun demo (dev only)
+        </p>
+        <p className="text-[11px] text-purple-900 font-mono">
+          aurabyqlue@gmail.com
+        </p>
+        <p className="text-[11px] text-purple-900 font-mono">
+          superadmin1234
+        </p>
+      </div>
     </form>
   );
 }
