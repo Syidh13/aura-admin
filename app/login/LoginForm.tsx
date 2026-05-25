@@ -28,6 +28,18 @@ export function LoginForm() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log('[login] submit', { email, passwordLen: password.length });
+
+    // Inline validation — button is always clickable now, so we tell the
+    // user clearly what's missing instead of silently disabling the button.
+    if (!email.trim()) {
+      setErrorMsg('Email belum diisi');
+      return;
+    }
+    if (password.length < 4) {
+      setErrorMsg('Password belum diisi');
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg(null);
 
@@ -44,8 +56,6 @@ export function LoginForm() {
     router.replace('/');
     router.refresh();
   };
-
-  const canSubmit = !submitting && email.length >= 5 && password.length >= 4;
 
   return (
     <form
@@ -86,12 +96,8 @@ export function LoginForm() {
 
       <button
         type="submit"
-        disabled={!canSubmit}
-        className={`w-full py-2.5 rounded-lg text-white text-sm font-medium transition ${
-          canSubmit
-            ? 'bg-purple-600 hover:bg-purple-700 cursor-pointer'
-            : 'bg-purple-300 cursor-not-allowed'
-        }`}
+        className="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white text-sm font-medium transition cursor-pointer disabled:bg-purple-400 disabled:cursor-wait"
+        disabled={submitting}
       >
         {submitting ? 'Memproses…' : 'Masuk'}
       </button>
