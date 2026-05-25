@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aura Admin
 
-## Getting Started
+Super admin web dashboard untuk [Aura](https://github.com/Syidh13/aura).
+Build: Next.js 16 (App Router) + TypeScript + Tailwind CSS + Supabase JS.
 
-First, run the development server:
+## What it does
+
+- Login (super_admin only — non-admin accounts get bounced)
+- Dashboard: aggregate stats (total warga, RW/RT status breakdown, pending pengajuan count)
+- **Pengajuan** queue — approve / reject calon ketua RT/RW
+- **RW & RT** browser — drill down: RW list → RT list per RW → Warga list per RT
+
+Same Supabase backend as the mobile app (`elsadrgrgntubaadwghr`). Reuses
+existing RPCs (`approve_pengajuan_ketua`, `get_pengajuan_for_approver`,
+`admin_dashboard_stats`, `admin_list_warga_in_rt`).
+
+## Setup
 
 ```bash
+npm install
+cp .env.local.example .env.local  # paste Supabase URL + anon key
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>. You'll get bounced to `/login` — sign in with
+a `super_admin` Supabase account.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech notes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js 16 renamed `middleware.ts` → `proxy.ts`. Convention is loose-typed
+  to the framework expectations.
+- Auth state lives in Supabase cookies (via `@supabase/ssr`). Server pages
+  read via `createClient()` from `lib/supabase/server.ts`. Client components
+  use `lib/supabase/client.ts`.
+- Role gate (`super_admin` only) enforced in `proxy.ts` — runs on every
+  request, non-admins get signed out and redirected to
+  `/login?error=not_admin`.
+- Server actions (`app/pengajuan/actions.ts`) call the existing
+  `approve_pengajuan_ketua` / `reject_pengajuan_ketua` RPCs and
+  `revalidatePath` the affected pages.
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  layout.tsx             — root shell (font, body bg)
+  page.tsx               — dashboard
+  login/
+    page.tsx             — login (Suspense-wrapped)
+    LoginForm.tsx        — client-only form
+  pengajuan/
+    page.tsx             — list pending + decided
+    PengajuanRow.tsx     — row with approve/reject buttons (client)
+    actions.ts           — server actions
+  rws/
+    page.tsx             — all RWs
+    [id]/page.tsx        — RTs in this RW
+  rts/[id]/page.tsx      — warga in this RT
+components/
+  AdminShell.tsx         — sidebar + content layout (client, for nav state)
+  StatusBadge.tsx        — shell/pending/active pill
+lib/supabase/
+  client.ts              — browser Supabase client
+  server.ts              — server Supabase client (uses async cookies())
+proxy.ts                 — auth + super_admin role gate
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Related repos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Syidh13/aura](https://github.com/Syidh13/aura) — mobile app (React Native + Expo)
