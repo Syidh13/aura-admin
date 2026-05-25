@@ -27,10 +27,9 @@ export function LoginForm() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log('[login] submit', { email, passwordLen: password.length });
 
-    // Inline validation — button is always clickable now, so we tell the
-    // user clearly what's missing instead of silently disabling the button.
+    // Inline validation — button is always clickable, so we tell the user
+    // clearly what's missing instead of silently disabling it.
     if (!email.trim()) {
       setErrorMsg('Email belum diisi');
       return;
@@ -44,8 +43,7 @@ export function LoginForm() {
     setErrorMsg(null);
 
     const supabase = createClient();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    console.log('[login] response', { ok: !error, userId: data?.user?.id, error: error?.message });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setErrorMsg(error.message ?? 'Login gagal');
