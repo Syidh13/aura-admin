@@ -27,11 +27,13 @@ export function LoginForm() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    console.log('[login] submit', { email, passwordLen: password.length });
     setSubmitting(true);
     setErrorMsg(null);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    console.log('[login] response', { ok: !error, userId: data?.user?.id, error: error?.message });
 
     if (error) {
       setErrorMsg(error.message ?? 'Login gagal');
@@ -42,6 +44,8 @@ export function LoginForm() {
     router.replace('/');
     router.refresh();
   };
+
+  const canSubmit = !submitting && email.length >= 5 && password.length >= 4;
 
   return (
     <form
@@ -82,8 +86,12 @@ export function LoginForm() {
 
       <button
         type="submit"
-        disabled={submitting || email.length < 5 || password.length < 4}
-        className="w-full py-2.5 rounded-lg bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        disabled={!canSubmit}
+        className={`w-full py-2.5 rounded-lg text-white text-sm font-medium transition ${
+          canSubmit
+            ? 'bg-purple-600 hover:bg-purple-700 cursor-pointer'
+            : 'bg-purple-300 cursor-not-allowed'
+        }`}
       >
         {submitting ? 'Memproses…' : 'Masuk'}
       </button>
