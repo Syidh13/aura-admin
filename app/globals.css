@@ -1,18 +1,38 @@
 @import "tailwindcss";
 
 /*
- * Admin dashboard is light-mode-only — explicit Tailwind palette throughout
- * the app. We do NOT honor prefers-color-scheme: dark because half the UI
- * uses hardcoded zinc-900 text + zinc-50 bg, which would look broken on a
- * black system theme. Lock the background + text colors here.
+ * Admin dashboard is LIGHT-MODE ONLY.
+ *
+ * The browser's prefers-color-scheme=dark was flipping our html bg to
+ * #0a0a0a behind our Tailwind classes — so all our hardcoded
+ * `text-zinc-900` text rendered dark-on-dark and disappeared. Plus the
+ * dark UA stylesheet was inverting native form input colors (white text
+ * on white inputs).
+ *
+ * Lock everything to light explicitly.
  */
 
 :root {
-  color-scheme: light;
+  color-scheme: light only;
 }
 
 html,
 body {
-  background: #fafafa; /* tailwind zinc-50 */
-  color: #18181b; /* tailwind zinc-900 */
+  background-color: #fafafa !important; /* zinc-50 */
+  color: #18181b !important; /* zinc-900 */
+}
+
+/* Force native form inputs to honor light scheme (no UA dark-mode
+   contrast inversion). */
+input,
+textarea,
+select,
+button {
+  color-scheme: light;
+  color: inherit;
+}
+
+input,
+textarea {
+  background-color: transparent;
 }
